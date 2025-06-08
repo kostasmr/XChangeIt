@@ -9,6 +9,8 @@ import DeletePage from './pages/DeletePage';
 import ProtectedRoute from './ProtectedRoutes';
 
 import './App.css'
+import RatiosPage from './pages/RatiosPage';
+import CreateRatioPage from './pages/CreateRatioPage'
 
 function App() {
 
@@ -22,15 +24,9 @@ function App() {
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/update" element={<ProtectedRoute><UpdatePage /></ProtectedRoute>} />
         <Route path="/delete" element={<ProtectedRoute><DeletePage /></ProtectedRoute>} />
+        <Route path="/ratios" element={<ProtectedRoute><RatiosPage /></ProtectedRoute>} />
+        <Route path="/create-ratio" element={<ProtectedRoute><CreateRatioPage /></ProtectedRoute>} />
       </Routes>
-        {/* <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/update" element={<UpdatePage />} />
-          <Route path="/delete" element={<DeletePage />} />
-        </Routes> */}
     </>
   )
 }

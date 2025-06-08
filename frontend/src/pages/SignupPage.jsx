@@ -13,42 +13,51 @@ function SignupPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
+    const [nameError, setNameError] = useState(null);
+    const [emailError, setEmailError] = useState(null);
+    const [passwordError, setPasswordError] = useState(null);
     const { setToken, setUser } = useUser();
     const navigate = useNavigate();
 
-    let emailValid = true;
-
     const validate = () => {
         if (!name.trim()) {
-        setError('Name is required');
-        return false;
+            setNameError('Name is required');
+        }else{
+            setNameError('')
         }
 
-        // Simple email regex
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-        emailValid = false;
-        setError('Invalid email address');
-        return false;
+            setEmailError('Invalid email address');
+        }else{
+            setEmailError('')
         }
 
-        if (password.length < 6) {
-        setError('Password must be at least 6 characters');
-        return false;
+        if (password.length < 6 || password.length == 0) {
+            setPasswordError('Password must be at least 6 characters');
+        }else{
+            setPasswordError('')
         }
 
-        setError('');
-        return true;
-    };
+        if(nameError || emailError || passwordError){
+            return false
+        }else{
+            return true
+        }
+    }
 
     const handleSignup = async () => {
-        if (!validate()) return;
+        if(!validate()) return
         try {
-            await api.post('/user', {
+            const res = await api.post('/user', {
                 "name": name,
                 "email": email,
                 "password": password,
             });
+            if(res.data.success == false){
+                setError("User with this email already exists!")
+                return;
+            }
 
             const response = await api.post(`/user/login`, { 
                 "email": email,
@@ -73,33 +82,41 @@ function SignupPage() {
         width="100%"
         >
         <h1 className="brand"><a>X</a>ChangeIt</h1>
-        <Field.Root>
+        <Field.Root marginBottom={5}>
             <Field.Label>Name</Field.Label>
             <Input 
             placeholder="Full-name" 
-            marginBottom={5}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            borderColor={nameError ? 'red.500' : ''}
+            onChange={(e) => {
+                setName(e.target.value)
+            }}
             />
+            {nameError && <Text color="red.500">{nameError}</Text>}
         </Field.Root>
-        <Field.Root>
+        <Field.Root marginBottom={5}>
             <Field.Label>Email</Field.Label>
             <Input 
             placeholder="me@example.com" 
-            marginBottom={5}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            borderColor={emailValid ? 'gray.800' : 'red.500'}
+            borderColor={emailError ? 'red.500' : ''}
+            onChange={(e) => {
+                setEmail(e.target.value)
+            }}
             />
+            {emailError && <Text color="red.500">{emailError}</Text>}
         </Field.Root>
-        <Field.Root>
+        <Field.Root marginBottom={5}>
             <Field.Label>Password</Field.Label>
             <Input 
             placeholder="**********" 
-            marginBottom={5}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            borderColor={passwordError ? 'red.500' : ''}
+            onChange={(e) => {
+                setPassword(e.target.value)
+            }}
             />
+            {passwordError && <Text color="red.500">{passwordError}</Text>}
         </Field.Root>
         <Button 
             colorPalette={"teal"} 

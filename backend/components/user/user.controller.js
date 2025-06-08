@@ -1,5 +1,7 @@
 import UserModel from './user.model.js';
 import jwt from "jsonwebtoken"
+import bcrypt from 'bcryptjs';
+
 
 
 export const getUsers = async (req, res) => {
@@ -20,16 +22,23 @@ export const createUser = async(req, res) => {
     let user = await UserModel.findOne({email: req.body.email});
 
     if(user){
-        return res.send({ message: 'User all ready exist!' });
+        return res.send({ success: false, message: 'User already exist!' });
     }
 
     const body = req.body;
-    const newUser = new UserModel(body);
 
-    await newUser.save();
+    const encryptedPassword = await bcrypt.hash(body.password, 8);
+
+    const newUser = {
+        "name": body.name,
+        "email": body.email,
+        "password": encryptedPassword
+    }
+
+    await UserModel.create(newUser);
     const token = generateTokenResponse(newUser);
 
-    res.status(201).json({ success: true, data: newUser, token });
+    res.status(201).json({ success: true, data: newUser, token});
 }
 
 export const deleteUser = async (req, res) =>{
@@ -62,8 +71,8 @@ export const loginUser = async (req, res) => {
     if(!user){
         res.status(400).send("This user does not exists!");
     }else{
-        // const isMatch = await bcrypt.compare(password, user.password);
-        if(password == user.password){
+        const isMatch = await bcrypt.compare(password, user.password);
+        if(isMatch){
             const token = generateTokenResponse(user);
 
             res.send({user, token});

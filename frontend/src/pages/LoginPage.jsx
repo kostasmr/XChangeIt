@@ -23,7 +23,6 @@ function LoginPage() {
             const { user, token } = response.data;
             setToken(token);
             setUser(user);
-            console.log(response)
             navigate('/home');
         } catch (err) {
             setError(err.response?.data?.message || 'Login failed');
@@ -47,7 +46,9 @@ function LoginPage() {
             placeholder="me@example.com" 
             marginBottom={5}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => 
+                setEmail(e.target.value)
+            }
             />
         </Field.Root>
         <Field.Root>
