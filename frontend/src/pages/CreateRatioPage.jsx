@@ -20,7 +20,7 @@ function RatiosPage() {
     const navigate = useNavigate("");
 
     const validateCurrency1 = (currency) => {
-        if(currency.length > 3 || !/^[A-Za-z]+$/.test(currency)){
+        if(currency.length != 3 || !/^[A-Za-z]+$/.test(currency)){
             setCur1Error("Please enter 3 characters (EUR, USD etc.)")
             return
         }else{
@@ -30,7 +30,7 @@ function RatiosPage() {
     }
 
     const validateCurrency2 = (currency) => {
-        if(currency.length > 3 || !/^[A-Za-z]+$/.test(currency)){
+        if(currency.length != 3 || !/^[A-Za-z]+$/.test(currency)){
             setCur2Error("Please enter 3 characters (EUR, USD etc.)")
             return
         }else if (currency == currency1){

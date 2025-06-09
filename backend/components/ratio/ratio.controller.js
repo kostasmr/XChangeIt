@@ -63,7 +63,11 @@ export const updateRatio = async (req, res) =>{
         return res.send({ message: 'This ratio doesn\'t exist' });
     }
 
+    const reverseName = ratio.to+"->"+ratio.from
+    const reverseRatio = await RatioModel.findOne({name: reverseName});
+    const updatedReverseRatio = (1 / updates.ratio).toFixed(4)
     await RatioModel.findByIdAndUpdate(req.params.id, updates, {new: true})
+    await RatioModel.findByIdAndUpdate(reverseRatio._id, {ratio: updatedReverseRatio}, {new: true})
     const updatedRatio = await RatioModel.findById(req.params.id);
     res.send({ message: 'Ratio '+ ratio.name +' updated!', updatedRatio});
 }

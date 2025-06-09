@@ -11,6 +11,7 @@ import ProtectedRoute from './ProtectedRoutes';
 import './App.css'
 import RatiosPage from './pages/RatiosPage';
 import CreateRatioPage from './pages/CreateRatioPage'
+import DeleteRatioPage from './pages/DeleteRatioPage';
 
 function App() {
 
@@ -26,6 +27,7 @@ function App() {
         <Route path="/delete" element={<ProtectedRoute><DeletePage /></ProtectedRoute>} />
         <Route path="/ratios" element={<ProtectedRoute><RatiosPage /></ProtectedRoute>} />
         <Route path="/create-ratio" element={<ProtectedRoute><CreateRatioPage /></ProtectedRoute>} />
+        <Route path="/delete-ratio" element={<ProtectedRoute><DeleteRatioPage /></ProtectedRoute>} />
       </Routes>
     </>
   )

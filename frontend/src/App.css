@@ -3,9 +3,28 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-  width: 35%;
+  width: 100%;
 }
 
+/* Tablets  */
+@media (min-width: 600px) {
+  #root {
+    width: 85%;
+  }
+}
 
+/* Small Desktops */
+@media (min-width: 1024px) {
+  #root {
+    width: 50%;
+  }
+}
+
+/* Large Desktops */
+@media (min-width: 1441px) {
+  #root {
+    width: 35%;
+  }
+}
 
 

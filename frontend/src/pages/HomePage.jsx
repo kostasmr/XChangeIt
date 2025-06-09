@@ -1,37 +1,78 @@
-import { Box, Button, Input, NativeSelect, Flex, IconButton, Text} from "@chakra-ui/react"
+import { Box, Button, Input, NativeSelect, Flex, IconButton, Text, Switch, Field} from "@chakra-ui/react"
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { FaRegUser } from "react-icons/fa";
 import { BiLogOut } from "react-icons/bi";
 import { useState, useEffect } from 'react';
 import { TbArrowsExchange } from "react-icons/tb";
+import { useUser } from '../UserContext';
 
 import '../css/HomePage.css'
 import api from '../api.js'
-import { useUser } from '../UserContext';
+import externalApi from '../externalApi.js'
+
 
 
 function HomePage() {
     const { user } = useUser();
-
     const [amount, setAmount] = useState("");
     const [fromCurrency, setFromCurrency] = useState(null);
     const [toCurrency, setToCurrency] = useState(null);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+    const [checked, setChecked] = useState(false)
     const navigate = useNavigate();
-
     const [ratios, setRatios] = useState([]);
+    const [externalCurrencies, setExternalCurrencies] = useState("")
+    const [externalRatios, setExternalRatios] = useState("")
+
+
     useEffect(() => {
         const fetchRatios = async () => {
             try {
-                const response = await api.get('/ratio');
-                setRatios(response.data); 
+                if(!checked){
+                    const response = await api.get('/ratio');
+                    setRatios(response.data); 
+                }
+                setError(null)
             } catch (err) {
-            setError(err.response?.data?.message || 'Failed to fetch ratios');
+                setError(err.response?.data?.message || 'Failed to fetch custom ratios');
             }
     };
         fetchRatios();
     }, []);
+
+    const fetchExternalCurrencies = async () => {
+        try {
+            if(checked){
+                const response = await externalApi.get('/currencies.min.json')
+                setExternalCurrencies(response.data)
+            }
+            setError(null)
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to fetch external currencies');
+        }
+    }
+
+    const fetchExternalRatios = async (currency) => {
+        try {
+            if(checked){
+                const response = await externalApi.get(`/currencies/${currency}.json`)
+
+                const ratios = response.data[currency];
+
+                if (Object.keys(ratios).length === 0) {
+                    setError("Ratio for this currency doesn't exist");
+                    setExternalRatios(null);
+                    return;
+                }
+
+                setExternalRatios(ratios);
+                setError(null);
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to fetch external ratios');
+        }
+    }
 
     const uniqueFromCurrencies = Array.from(
         new Set(ratios.map(item => item.from))
@@ -51,7 +92,7 @@ function HomePage() {
             setError("Enter a number")
             setResult(null)
             return
-        }else if(fromCurrency == null || toCurrency == null){
+        }else if(fromCurrency == null || toCurrency == null || toCurrency == ""){
             setError("Choose currency")
             setResult(null)
             return
@@ -59,16 +100,26 @@ function HomePage() {
         setError(null)
         
         const ratioName = `${fromCurrency.toUpperCase()}->${toCurrency.toUpperCase()}`;
-        const ratioId = getIdByName(ratioName)
-        try {
-            const response = await api.get(`/ratio/${ratioId}`);
-            const rate = response.data.ratio
-            const converted = (amount * rate).toFixed(3);
+        if(!checked){
+            const ratioId = getIdByName(ratioName)
+            try {
+                const response = await api.get(`/ratio/${ratioId}`);
+                const rate = response.data.ratio
+                const converted = (amount * rate).toFixed(3);
+                setResult(converted);
+                setError(null);
+            } catch (err) {
+                console.error('Failed to fetch ratio by name:', err);
+            }
+        }else{
+            console.log(toCurrency)
+            const ratio = externalRatios[toCurrency]
+            console.log(ratio)
+            const converted = (amount * ratio).toFixed(3);
             setResult(converted);
             setError(null);
-        } catch (err) {
-            console.error('Failed to fetch ratio by name:', err);
         }
+
     };
 
     const handleLogout = async () => {
@@ -91,10 +142,11 @@ function HomePage() {
         <Box
             borderWidth="1px"
             borderRadius="20px"
-            borderColor="white"
+            borderColor={'white'}
             color="fg.disabled"
             padding="30px"
             width="100%"
+            animation={checked ? `borderPulse 2s infinite` : 'white'}
             >
             <Flex align={"center"} justify={"space-between"} width={"full"}>
                 <IconButton aria-label="Search database" variant={"solid"} colorPalette={"teal"} onClick={handleLogout}>
@@ -107,32 +159,34 @@ function HomePage() {
             </Flex>
             <h3>Convert money at the real exchange rate</h3>
             <Flex align={"stretch"} justify={"space-between"} wrap={"wrap"}>
-                <Box
-                    borderRadius="5px"
-                    borderWidth="1px"
-                    borderColor="teal"
-                    color="fg.disabled"
-                    bg={"white"}
-                    display={"flex"}
-                    alignItems={"center"}
-                    width={"60%"}
-                    height={"60px"}
-                    marginBottom={3}
-                >
-                    <Input
-                        type="number"
-                        value={amount}
-                        onChange={(e) => setAmount(parseFloat(e.target.value) || "")}
-                        min={0}
-                        placeholder="Enter amount"
-                        color={"black"}
-                        display="flex"
-                        alignItems="center"
-                        height={"full"}
-                        bg="transparent"           
-                        border="none" 
-                    />
-                </Box>
+                <Flex width={"50%"}>
+                    <Box
+                        borderRadius="5px"
+                        borderWidth="1px"
+                        borderColor="teal"
+                        color="fg.disabled"
+                        bg={"white"}
+                        display={"flex"}
+                        alignItems={"center"}
+                        width={"full"}
+                        height={"60px"}
+                        marginBottom={3}
+                    >
+                        <Input
+                            type="number"
+                            value={amount}
+                            onChange={(e) => setAmount(parseFloat(e.target.value) || "")}
+                            min={0}
+                            placeholder="Enter amount"
+                            color={"black"}
+                            display="flex"
+                            alignItems="center"
+                            height={"full"}
+                            bg="transparent"           
+                            border="none" 
+                        />
+                    </Box>
+                </Flex>
                 <Flex gap={3}>
                     <Box 
                         borderRadius="5px"
@@ -143,12 +197,28 @@ function HomePage() {
                         marginBottom={5}
                     >
                         <NativeSelect.Root key={"select-from"} variant={"plain"} height={"full"}>
-                            <NativeSelect.Field placeholder="Select" color={"white"} height={"full"} value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>  
-                                {uniqueFromCurrencies.map((currency) => (
+                            <NativeSelect.Field 
+                                placeholder="Select" 
+                                color={"white"} 
+                                height={"full"} 
+                                value={fromCurrency} 
+                                onChange={(e) => {
+                                    const selectedValue = e.target.value;
+                                    setFromCurrency(selectedValue)
+                                    setResult(null)
+                                    setToCurrency("")
+                                    fetchExternalRatios(selectedValue)
+                                }}
+                                >  
+                                {!checked ? uniqueFromCurrencies.map((currency) => (
                                     <option key={currency} value={currency}>
                                         {currency}
-                                    </option>
-                                ))}
+                                    </option>)) :
+                                    Object.keys(externalCurrencies).map((currency) => (
+                                    <option key={currency} value={currency}>
+                                        {currency.toUpperCase()}
+                                    </option>))
+                                }
                             </NativeSelect.Field>
                             <NativeSelect.Indicator />
                         </NativeSelect.Root>
@@ -170,14 +240,23 @@ function HomePage() {
                                 color={"white"} 
                                 height={"full"} 
                                 value={toCurrency} 
-                                onChange={(e) => setToCurrency(e.target.value)}>  
-                                {ratios
+                                onChange={(e) => {
+                                    setToCurrency(e.target.value)
+                                    setResult(null)
+                                }}
+                                >  
+                                {!checked ? ratios
                                     .filter((item) => item.from === fromCurrency)
                                     .map((item) => (
                                         <option key={item.to} value={item.to}>
                                             {item.to}
-                                        </option>
-                                ))}
+                                        </option>)) :
+                                     externalRatios && Object.keys(externalRatios)
+                                    .map((item) => (
+                                        <option key={item} value={item}>
+                                            {item.toUpperCase()}
+                                        </option>))
+                                }
                             </NativeSelect.Field>
                             <NativeSelect.Indicator />
                         </NativeSelect.Root>
@@ -189,25 +268,43 @@ function HomePage() {
             <Button 
                 colorPalette={"teal"} 
                 width={"full"}
-                marginBottom={5}
                 fontWeight={"bold"}
                 onClick={handleConvert}
             >
                 Convert
             </Button>
-            <Text color="red.500" fontWeight="medium" mt={2} error marginBottom={5}>
+            <Text color="red.500" fontWeight="medium" mt={5} error>
                 {error}
             </Text>
-            {result && 
-                <>
-                    <Text marginBottom={5}>{amount} {fromCurrency.toUpperCase()} = {' '}
-                        <Text as={"span"} color={"teal"}>{result} </Text>{toCurrency.toUpperCase()}
-                    </Text>
-                    <Flex justify={"center"}>
-                        <IconButton as={RouterLink} to="/ratios" variant={"outline"} colorPalette={"teal"} padding={4}>Explore Ratios</IconButton>
-                    </Flex>
-                </>
+            <Flex justify={"space-between"} align={"center"}>
+                <IconButton as={RouterLink} to="/ratios" variant={"outline"} colorPalette={"teal"} padding={4}>Custom Ratios</IconButton>
+                <Switch.Root
+                    checked={checked}
+                    onCheckedChange={(e) => {
+                        setChecked(e.checked)
+                        setError(null)
+                        setFromCurrency("")
+                        setToCurrency("")
+                        setResult(null)
+                        fetchExternalCurrencies()
+                    }}
+                    size={"lg"}
+                    colorPalette={"teal"} 
+                    defaultChecked
+                >
+                    <Switch.HiddenInput />
+                    <Switch.Label color={ checked ? "teal": "gray"} fontSize={"16px"}>Live Ratios</Switch.Label>
+                    <Switch.Control>
+                        <Switch.Thumb />
+                    </Switch.Control>
+                </Switch.Root>
+            </Flex>
+            {result &&        
+                <Text marginTop={5} fontSize={18}>{amount} {fromCurrency.toUpperCase()} = {' '}
+                    <Text as={"span"} color={"teal"}>{result} </Text>{toCurrency.toUpperCase()}
+                </Text>
             }
+
         </Box>
     )
 }

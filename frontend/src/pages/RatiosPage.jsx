@@ -1,9 +1,9 @@
 
-import { Link as RouterLink } from 'react-router-dom';
-import { Box, Button, IconButton, Flex, Text, Stack, For, Input} from "@chakra-ui/react"
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Box, Button, IconButton, Flex, Text, Stack, For, Input, Spinner} from "@chakra-ui/react"
 import { IoMdArrowRoundBack } from "react-icons/io";
 import api from '../api.js'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IoSettingsOutline } from "react-icons/io5";
 import { MdDeleteForever } from "react-icons/md";
 import { IoAddOutline } from "react-icons/io5";
@@ -17,7 +17,8 @@ function RatiosPage() {
     const [ratios, setRatios] = useState(null);
     const [editngRatio, setEditingRatio] = useState(null);
     const [editingId, setEditingId] = useState(null);
-
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate()
 
     const handleEditClick = (item) => {
         setEditingId(item._id);
@@ -35,12 +36,14 @@ function RatiosPage() {
         }
         try {
             await api.put(`/ratio/${id}`,{ "ratio": editngRatio});
+            await getRatios();
         } catch (err) {
             setError(err.response?.data?.message || 'Update failed');
         }
         setEditingId(null);
         setEditingRatio(null)
         setError(null)
+        
     };
 
     const handleCancel = async () => {
@@ -49,23 +52,25 @@ function RatiosPage() {
         setError(null)
     };
 
-    const deleteRatio = async (id) => {
-        try {
-            await api.delete(`/ratio/${id}`);
-        } catch (err) {
-            setError(err.response?.data?.message || 'Delete failed');
-        }
+    const deleteRatio = (id) => {
+        navigate(`/delete-ratio?id=${id}`);
     };
 
     const getRatios = async () => {
+        setLoading(true);
         try {
             const response = await api.get(`/ratio`);
             setRatios(response.data)
         } catch (err) {
             setError(err.response?.data?.message || 'Get ratios failed');
+        } finally {
+            setLoading(false);
         }
     };
-    getRatios()
+    useEffect(() => {
+        getRatios();
+    }, []);
+
 
 
     return (
@@ -84,6 +89,7 @@ function RatiosPage() {
                 <h2 className="brand"><a>X</a>ChangeIt</h2>
             </Flex>
             {error && <Text color="red.500" mb={3}>{error}</Text>}
+            {loading && <Spinner size="xl" color="teal" />}
             <Stack maxH="300px" overflowY="auto" scrollBehavior="smooth" marginBottom={5}>
                 <For
                     each={ratios}

@@ -19,3 +19,9 @@ h3{
     margin-bottom: 30px;
     margin-top: 10px;
 }
+
+@keyframes borderPulse {
+  0% { border-color: white; }
+  40% { border-color: teal; }
+  80% { border-color: rgb(62, 200, 200); }
+}
