@@ -1,6 +1,6 @@
 
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { Box, Button, IconButton, Flex, Text, Stack, For, Input, Spinner} from "@chakra-ui/react"
+import { Link as RouterLink } from 'react-router-dom';
+import { Box, Button, IconButton, Flex, Text, Stack, For, Input, Spinner, CloseButton, Dialog, Portal} from "@chakra-ui/react"
 import { IoMdArrowRoundBack } from "react-icons/io";
 import api from '../api.js'
 import { useState, useEffect } from 'react';
@@ -18,7 +18,9 @@ function RatiosPage() {
     const [editngRatio, setEditingRatio] = useState(null);
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate()
+    const [dialogItem, setDialogItem] = useState(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(null);
+
 
     const handleEditClick = (item) => {
         setEditingId(item._id);
@@ -52,8 +54,16 @@ function RatiosPage() {
         setError(null)
     };
 
-    const deleteRatio = (id) => {
-        navigate(`/delete-ratio?id=${id}`);
+    const deleteRatio = async (id) => {
+        try 
+        {
+            await api.delete(`/ratio/${id}`);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Delete failed');
+        }
+        setDialogItem(null)
+        setIsDialogOpen(null)
+        getRatios()
     };
 
     const getRatios = async () => {
@@ -137,9 +147,39 @@ function RatiosPage() {
                                         <IconButton aria-label="Search database" variant={"outline"} colorPalette={"teal"} onClick={() => handleEditClick(item)}>
                                             <IoSettingsOutline />
                                         </IconButton>
-                                        <IconButton aria-label="Search database" variant={"outline"} colorPalette={"red"} onClick={() => deleteRatio(item._id)}>
-                                            <MdDeleteForever />
-                                        </IconButton>
+                                        <Dialog.Root open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)} key={"center"} placement={"center"}>
+                                            <Dialog.Trigger asChild>
+                                                <IconButton aria-label="Search database" variant={"outline"} colorPalette={"red"} onClick={() => setDialogItem(item)}>
+                                                    <MdDeleteForever />
+                                                </IconButton>
+                                            </Dialog.Trigger>
+                                            <Portal>
+                                                <Dialog.Backdrop />
+                                                <Dialog.Positioner>
+                                                <Dialog.Content>
+                                                    <Dialog.Header>
+                                                    <Dialog.Title>Confirm Deletion</Dialog.Title>
+                                                    </Dialog.Header>
+                                                    <Dialog.Body>
+                                                    <p>Are you sure you want to delete the ratios between {dialogItem?.from}, {dialogItem?.to}?</p>
+                                                    </Dialog.Body>
+                                                    <Dialog.Footer>
+                                                    <Dialog.ActionTrigger asChild>
+                                                        <Button variant="outline">Cancel</Button>
+                                                    </Dialog.ActionTrigger>
+                                                    <Button variant={"solid"} colorPalette={"red"} onClick={() => {
+                                                        deleteRatio(item._id);
+                                                    }}>
+                                                        Confirm
+                                                    </Button>
+                                                    </Dialog.Footer>
+                                                    <Dialog.CloseTrigger asChild>
+                                                        <CloseButton size="sm" />
+                                                    </Dialog.CloseTrigger>
+                                                </Dialog.Content>
+                                                </Dialog.Positioner>
+                                            </Portal>
+                                        </Dialog.Root>
                                     </Flex>
                                 </>
                             )}

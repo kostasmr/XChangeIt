@@ -55,6 +55,14 @@ function RatiosPage() {
         }
     }
     const addRatio = async () =>{
+        if(currency1 == null || currency2 == null){
+            setError("Please enter currency");
+            return;
+        }
+        if(ratio == null){
+            setError("Please enter a ratio");
+            return;
+        }
         try {
             const res = await api.post(`/ratio`, { 
                 "from": currency1,

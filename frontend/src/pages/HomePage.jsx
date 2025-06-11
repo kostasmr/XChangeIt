@@ -14,7 +14,7 @@ import externalApi from '../externalApi.js'
 
 function HomePage() {
     const { user } = useUser();
-    const [amount, setAmount] = useState("");
+    const [amount, setAmount] = useState(null);
     const [fromCurrency, setFromCurrency] = useState(null);
     const [toCurrency, setToCurrency] = useState(null);
     const [result, setResult] = useState(null);
@@ -112,9 +112,7 @@ function HomePage() {
                 console.error('Failed to fetch ratio by name:', err);
             }
         }else{
-            console.log(toCurrency)
             const ratio = externalRatios[toCurrency]
-            console.log(ratio)
             const converted = (amount * ratio).toFixed(3);
             setResult(converted);
             setError(null);
@@ -148,7 +146,7 @@ function HomePage() {
             width="100%"
             animation={checked ? `borderPulse 2s infinite` : 'white'}
             >
-            <Flex align={"center"} justify={"space-between"} width={"full"}>
+            <Flex align={"center"} justify={"space-between"} width={"full"} wrap={"wrap"}>
                 <IconButton aria-label="Search database" variant={"solid"} colorPalette={"teal"} onClick={handleLogout}>
                         <BiLogOut />
                 </IconButton>
@@ -198,7 +196,7 @@ function HomePage() {
                     >
                         <NativeSelect.Root key={"select-from"} variant={"plain"} height={"full"}>
                             <NativeSelect.Field 
-                                placeholder="Select" 
+                                placeholder="- -" 
                                 color={"white"} 
                                 height={"full"} 
                                 value={fromCurrency} 
@@ -209,11 +207,12 @@ function HomePage() {
                                     setToCurrency("")
                                     fetchExternalRatios(selectedValue)
                                 }}
-                                >  
+                                >
                                 {!checked ? uniqueFromCurrencies.map((currency) => (
                                     <option key={currency} value={currency}>
                                         {currency}
-                                    </option>)) :
+                                    </option>
+                                    )) :
                                     Object.keys(externalCurrencies).map((currency) => (
                                     <option key={currency} value={currency}>
                                         {currency.toUpperCase()}
@@ -236,7 +235,7 @@ function HomePage() {
                     >
                         <NativeSelect.Root key={"select-to"} variant={"plain"} height={"full"}>
                             <NativeSelect.Field 
-                                placeholder="Select" 
+                                placeholder="- -" 
                                 color={"white"} 
                                 height={"full"} 
                                 value={toCurrency} 
@@ -286,6 +285,7 @@ function HomePage() {
                         setFromCurrency("")
                         setToCurrency("")
                         setResult(null)
+                        setAmount("")
                         fetchExternalCurrencies()
                     }}
                     size={"lg"}

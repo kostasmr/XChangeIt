@@ -85,36 +85,37 @@ function SignupPage() {
         <Field.Root marginBottom={5}>
             <Field.Label>Name</Field.Label>
             <Input 
-            placeholder="Full-name" 
-            value={name}
-            borderColor={nameError ? 'red.500' : ''}
-            onChange={(e) => {
-                setName(e.target.value)
-            }}
+                placeholder="Full-name" 
+                value={name}
+                borderColor={nameError ? 'red.500' : ''}
+                onChange={(e) => {
+                    setName(e.target.value)
+                }}
             />
             {nameError && <Text color="red.500">{nameError}</Text>}
         </Field.Root>
         <Field.Root marginBottom={5}>
             <Field.Label>Email</Field.Label>
             <Input 
-            placeholder="me@example.com" 
-            value={email}
-            borderColor={emailError ? 'red.500' : ''}
-            onChange={(e) => {
-                setEmail(e.target.value)
-            }}
+                placeholder="me@example.com" 
+                value={email}
+                borderColor={emailError ? 'red.500' : ''}
+                onChange={(e) => {
+                    setEmail(e.target.value)
+                }}
             />
             {emailError && <Text color="red.500">{emailError}</Text>}
         </Field.Root>
         <Field.Root marginBottom={5}>
             <Field.Label>Password</Field.Label>
             <Input 
-            placeholder="**********" 
-            value={password}
-            borderColor={passwordError ? 'red.500' : ''}
-            onChange={(e) => {
-                setPassword(e.target.value)
-            }}
+                type="password"
+                placeholder="Password" 
+                value={password}
+                borderColor={passwordError ? 'red.500' : ''}
+                onChange={(e) => {
+                    setPassword(e.target.value)
+                }}
             />
             {passwordError && <Text color="red.500">{passwordError}</Text>}
         </Field.Root>
