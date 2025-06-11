@@ -4,7 +4,13 @@
 
 **XChangeIt** is a modern currency converter web application that allows users to manage and convert currencies using both **custom and live exchange rates**. Built with full-stack technologies, this app provides a secure and responsive interface for personal currency management.
 
-### 🎯 Project Goals
+## 🛠 Tech Stack
+- Frontend: React + Chakra UI
+- Backend: Node.js + Express
+- Database: MongoDB
+- Authentication: JWT + bcrypt
+
+## 🎯 Project Goals
 
 - Allow users to **register and log in** securely.
 - Enable custom **currency ratio creation, update, and deletion**.
@@ -63,4 +69,10 @@ npm install
 # MONGO_URI=your_database_uri
 
 # Start both servers (frontend and backend)
-npm start  # If concurrently set up, or run separately
+npm start
+
+# Go to http://localhost:5173
+```
+
+
+🌟 If you like Exchange, consider giving it a star on GitHub! ⭐
