@@ -1,4 +1,4 @@
-import { Box, Button, Input, NativeSelect, Flex, IconButton, Text, Switch, Field} from "@chakra-ui/react"
+import { Box, Button, Input, NativeSelect, Flex, IconButton, Text, Switch, Spinner} from "@chakra-ui/react"
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { FaRegUser } from "react-icons/fa";
 import { BiLogOut } from "react-icons/bi";
@@ -24,36 +24,41 @@ function HomePage() {
     const [ratios, setRatios] = useState([]);
     const [externalCurrencies, setExternalCurrencies] = useState("")
     const [externalRatios, setExternalRatios] = useState("")
-
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchRatios = async () => {
+            setLoading(true);
             try {
-                if(!checked){
-                    const response = await api.get('/ratio');
-                    setRatios(response.data); 
-                }
+                const response = await api.get('/ratio');
+                setRatios(response.data); 
                 setError(null)
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to fetch custom ratios');
+            } finally {
+                setLoading(false);
             }
-    };
+        };
         fetchRatios();
+        fetchExternalCurrencies();
     }, []);
 
     const fetchExternalCurrencies = async () => {
+        setLoading(true);
         try {
-            if(checked){
-                const response = await externalApi.get('/currencies.min.json')
-                setExternalCurrencies(response.data)
-            }
+            const response = await externalApi.get('/currencies.min.json')
+            setExternalCurrencies(response.data)
             setError(null)
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch external currencies');
+        } finally {
+            setLoading(false);
         }
-    }
+    };
+
 
     const fetchExternalRatios = async (currency) => {
+        setLoading(true);
         try {
             if(checked){
                 const response = await externalApi.get(`/currencies/${currency}.json`)
@@ -71,6 +76,8 @@ function HomePage() {
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch external ratios');
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -156,6 +163,7 @@ function HomePage() {
                 </IconButton>
             </Flex>
             <h3>Convert money at the real exchange rate</h3>
+            {loading && <Spinner size="xl" color="teal" />}
             <Flex align={"stretch"} justify={"space-between"} wrap={"wrap"}>
                 <Flex width={"50%"}>
                     <Box
@@ -280,13 +288,12 @@ function HomePage() {
                 <Switch.Root
                     checked={checked}
                     onCheckedChange={(e) => {
-                        setChecked(e.checked)
                         setError(null)
                         setFromCurrency("")
                         setToCurrency("")
                         setResult(null)
                         setAmount("")
-                        fetchExternalCurrencies()
+                        setChecked(e.checked)
                     }}
                     size={"lg"}
                     colorPalette={"teal"} 
