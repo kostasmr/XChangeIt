@@ -67,24 +67,25 @@ To run this project locally:
 # Clone the repository
 git clone https://github.com/kostasmr/XChangeIt.git
 
-# Install frontend dependencies
-cd frontend
-npm install
-
-# Install backend dependencies
-cd backend
-npm install
-
 # Set up environment variables (.env)
 # Example:
 # JWT_SECRET=your_secret
 # MONGO_URI=your_database_uri
 
+# Install frontend dependencies
+cd frontend
+npm install vite --save-dev
+
 # Start both servers (frontend and backend)
+cd frontend
 npm start
 
-# Go to http://localhost:5173
+cd backend
+npm start
+
+# Go to http://localhost:5173 and make an account
 ```
 
-
+<br>
+<br>
 🌟 If you like Exchange, consider giving it a star on GitHub! ⭐
